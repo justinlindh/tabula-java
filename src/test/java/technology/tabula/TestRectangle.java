@@ -61,7 +61,7 @@ public class TestRectangle {
 		Rectangle lower = new Rectangle(175.72f, 72.72f, 1.67f, 1.52f); //, (Comma after AARON)
 		Rectangle upper = new Rectangle(169.21f, 161.16f, 4.33f, 4.31f); // R (REGIONAL PULMONARY)
 		
-		assertTrue(lower.compareTo(upper) < 0);
+		assertTrue(lower.compareTo(upper) > 0);
 		
 	}
 
@@ -81,11 +81,11 @@ public class TestRectangle {
 		
 		List<Rectangle> expectedList = new ArrayList<Rectangle>();
 		expectedList.add(first);
+		expectedList.add(six);
 		expectedList.add(second);
 		expectedList.add(third);
 		expectedList.add(fourth);
 		expectedList.add(fifth);
-		expectedList.add(six);
 		List<Rectangle> toSortList = new ArrayList<Rectangle>();
 		toSortList.add(six);
 		toSortList.add(second);
@@ -94,12 +94,8 @@ public class TestRectangle {
 		toSortList.add(first);
 		toSortList.add(fourth);
 		
-		//Also fails with Collections.sort
 		Collections.sort(toSortList);
 		
-		for (Rectangle rectangle : toSortList) {
-			System.out.println(rectangle);
-		}
 		assertEquals(expectedList, toSortList);
 	}
 }
