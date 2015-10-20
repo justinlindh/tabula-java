@@ -98,4 +98,54 @@ public class TestRectangle {
 		
 		assertEquals(expectedList, toSortList);
 	}
+	
+	@Test
+	public void testGetVerticalOverlapShouldReturnZero() {
+		
+		Rectangle lower = new Rectangle(10f, 0f, 10f, 10f);
+		Rectangle upper = new Rectangle(20f,0f, 10f, 10f);
+		
+		float overlap = lower.verticalOverlap(upper);
+		
+		assertEquals(0f, overlap, 0);
+		assertTrue(!lower.verticallyOverlaps(upper));
+			
+	}
+	
+	@Test
+	public void testGetVerticalOverlapShouldReturnMoreThanZero() {
+		
+		Rectangle lower = new Rectangle(15f, 10f, 10f, 10f);
+		Rectangle upper = new Rectangle(20f, 0f, 10f, 10f);
+		
+		float overlap = lower.verticalOverlap(upper);
+		
+		assertEquals(5f, overlap, 0);
+		assertTrue(lower.verticallyOverlaps(upper));
+			
+	}
+	
+	@Test
+	public void testGetHorizontalOverlapShouldReturnZero() {
+		
+		Rectangle one = new Rectangle(0f, 0f, 10f, 10f);
+		Rectangle two = new Rectangle(10f, 10f, 10f, 10f);
+		
+		assertTrue(!one.horizontallyOverlaps(two));
+		assertEquals(0f, one.horizontalOverlapRatio(two), 0);
+			
+	}
+	
+	@Test
+	public void testGetHorizontalOverlapShouldReturnMoreThanZero() {
+		
+		Rectangle one = new Rectangle(0f, 0f, 10f, 10f);
+		Rectangle two = new Rectangle(10f, 5f, 10f, 10f);
+		
+		assertTrue(one.horizontallyOverlaps(two));
+		assertEquals(5f, one.horizontalOverlap(two), 0);
+		assertEquals(0f, one.horizontalOverlapRatio(two), 0);
+			
+	}
+	
 }
