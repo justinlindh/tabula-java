@@ -1,156 +1,31 @@
 package technology.tabula;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.awt.geom.Point2D;
+import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.junit.Test;
 
-import technology.tabula.Cell;
-import technology.tabula.Page;
-import technology.tabula.Rectangle;
-import technology.tabula.Ruling;
 import technology.tabula.extractors.SpreadsheetExtractionAlgorithm;
 import technology.tabula.writers.CSVWriter;
-import technology.tabula.UtilsForTesting;
 import technology.tabula.writers.JSONWriter;
-import java.text.Normalizer;
 
 public class TestSpreadsheetExtractor {
 
-    private static final Cell[] CELLS = new Cell[] {
-            new Cell(40.0f, 18.0f, 208.0f, 4.0f),
-            new Cell(44.0f, 18.0f, 52.0f, 6.0f),
-            new Cell(50.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(54.0f, 18.0f, 52.0f, 6.0f),
-            new Cell(60.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(64.0f, 18.0f, 52.0f, 6.0f),
-            new Cell(70.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(74.0f, 18.0f, 52.0f, 6.0f),
-            new Cell(90.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(94.0f, 18.0f, 52.0f, 6.0f),
-            new Cell(100.0f, 18.0f, 52.0f, 28.0f),
-            new Cell(128.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(132.0f, 18.0f, 52.0f, 64.0f),
-            new Cell(196.0f, 18.0f, 52.0f, 66.0f),
-            new Cell(262.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(266.0f, 18.0f, 52.0f, 84.0f),
-            new Cell(350.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(354.0f, 18.0f, 52.0f, 32.0f),
-            new Cell(386.0f, 18.0f, 52.0f, 38.0f),
-            new Cell(424.0f, 18.0f, 52.0f, 18.0f),
-            new Cell(442.0f, 18.0f, 52.0f, 74.0f),
-            new Cell(516.0f, 18.0f, 52.0f, 28.0f),
-            new Cell(544.0f, 18.0f, 52.0f, 4.0f),
-            new Cell(44.0f, 70.0f, 156.0f, 6.0f),
-            new Cell(50.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(54.0f, 70.0f, 156.0f, 6.0f),
-            new Cell(60.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(64.0f, 70.0f, 156.0f, 6.0f),
-            new Cell(70.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(74.0f, 70.0f, 156.0f, 6.0f),
-            new Cell(84.0f, 70.0f, 2.0f, 6.0f),
-            new Cell(90.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(94.0f, 70.0f, 156.0f, 6.0f),
-            new Cell(100.0f, 70.0f, 156.0f, 28.0f),
-            new Cell(128.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(132.0f, 70.0f, 156.0f, 64.0f),
-            new Cell(196.0f, 70.0f, 156.0f, 66.0f),
-            new Cell(262.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(266.0f, 70.0f, 156.0f, 84.0f),
-            new Cell(350.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(354.0f, 70.0f, 156.0f, 32.0f),
-            new Cell(386.0f, 70.0f, 156.0f, 38.0f),
-            new Cell(424.0f, 70.0f, 156.0f, 18.0f),
-            new Cell(442.0f, 70.0f, 156.0f, 74.0f),
-            new Cell(516.0f, 70.0f, 156.0f, 28.0f),
-            new Cell(544.0f, 70.0f, 156.0f, 4.0f),
-            new Cell(84.0f, 72.0f, 446.0f, 6.0f),
-            new Cell(90.0f, 226.0f, 176.0f, 4.0f),
-            new Cell(94.0f, 226.0f, 176.0f, 6.0f),
-            new Cell(100.0f, 226.0f, 176.0f, 28.0f),
-            new Cell(128.0f, 226.0f, 176.0f, 4.0f),
-            new Cell(132.0f, 226.0f, 176.0f, 64.0f),
-            new Cell(196.0f, 226.0f, 176.0f, 66.0f),
-            new Cell(262.0f, 226.0f, 176.0f, 4.0f),
-            new Cell(266.0f, 226.0f, 176.0f, 84.0f),
-            new Cell(350.0f, 226.0f, 176.0f, 4.0f),
-            new Cell(354.0f, 226.0f, 176.0f, 32.0f),
-            new Cell(386.0f, 226.0f, 176.0f, 38.0f),
-            new Cell(424.0f, 226.0f, 176.0f, 18.0f),
-            new Cell(442.0f, 226.0f, 176.0f, 74.0f),
-            new Cell(516.0f, 226.0f, 176.0f, 28.0f),
-            new Cell(544.0f, 226.0f, 176.0f, 4.0f),
-            new Cell(90.0f, 402.0f, 116.0f, 4.0f),
-            new Cell(94.0f, 402.0f, 116.0f, 6.0f),
-            new Cell(100.0f, 402.0f, 116.0f, 28.0f),
-            new Cell(128.0f, 402.0f, 116.0f, 4.0f),
-            new Cell(132.0f, 402.0f, 116.0f, 64.0f),
-            new Cell(196.0f, 402.0f, 116.0f, 66.0f),
-            new Cell(262.0f, 402.0f, 116.0f, 4.0f),
-            new Cell(266.0f, 402.0f, 116.0f, 84.0f),
-            new Cell(350.0f, 402.0f, 116.0f, 4.0f),
-            new Cell(354.0f, 402.0f, 116.0f, 32.0f),
-            new Cell(386.0f, 402.0f, 116.0f, 38.0f),
-            new Cell(424.0f, 402.0f, 116.0f, 18.0f),
-            new Cell(442.0f, 402.0f, 116.0f, 74.0f),
-            new Cell(516.0f, 402.0f, 116.0f, 28.0f),
-            new Cell(544.0f, 402.0f, 116.0f, 4.0f),
-            new Cell(84.0f, 518.0f, 246.0f, 6.0f),
-            new Cell(90.0f, 518.0f, 186.0f, 4.0f),
-            new Cell(94.0f, 518.0f, 186.0f, 6.0f),
-            new Cell(100.0f, 518.0f, 186.0f, 28.0f),
-            new Cell(128.0f, 518.0f, 186.0f, 4.0f),
-            new Cell(132.0f, 518.0f, 186.0f, 64.0f),
-            new Cell(196.0f, 518.0f, 186.0f, 66.0f),
-            new Cell(262.0f, 518.0f, 186.0f, 4.0f),
-            new Cell(266.0f, 518.0f, 186.0f, 84.0f),
-            new Cell(350.0f, 518.0f, 186.0f, 4.0f),
-            new Cell(354.0f, 518.0f, 186.0f, 32.0f),
-            new Cell(386.0f, 518.0f, 186.0f, 38.0f),
-            new Cell(424.0f, 518.0f, 186.0f, 18.0f),
-            new Cell(442.0f, 518.0f, 186.0f, 74.0f),
-            new Cell(516.0f, 518.0f, 186.0f, 28.0f),
-            new Cell(544.0f, 518.0f, 186.0f, 4.0f),
-            new Cell(90.0f, 704.0f, 60.0f, 4.0f),
-            new Cell(94.0f, 704.0f, 60.0f, 6.0f),
-            new Cell(100.0f, 704.0f, 60.0f, 28.0f),
-            new Cell(128.0f, 704.0f, 60.0f, 4.0f),
-            new Cell(132.0f, 704.0f, 60.0f, 64.0f),
-            new Cell(196.0f, 704.0f, 60.0f, 66.0f),
-            new Cell(262.0f, 704.0f, 60.0f, 4.0f),
-            new Cell(266.0f, 704.0f, 60.0f, 84.0f),
-            new Cell(350.0f, 704.0f, 60.0f, 4.0f),
-            new Cell(354.0f, 704.0f, 60.0f, 32.0f),
-            new Cell(386.0f, 704.0f, 60.0f, 38.0f),
-            new Cell(424.0f, 704.0f, 60.0f, 18.0f),
-            new Cell(442.0f, 704.0f, 60.0f, 74.0f),
-            new Cell(516.0f, 704.0f, 60.0f, 28.0f),
-            new Cell(544.0f, 704.0f, 60.0f, 4.0f),
-            new Cell(84.0f, 764.0f, 216.0f, 6.0f),
-            new Cell(90.0f, 764.0f, 216.0f, 4.0f),
-            new Cell(94.0f, 764.0f, 216.0f, 6.0f),
-            new Cell(100.0f, 764.0f, 216.0f, 28.0f),
-            new Cell(128.0f, 764.0f, 216.0f, 4.0f),
-            new Cell(132.0f, 764.0f, 216.0f, 64.0f),
-            new Cell(196.0f, 764.0f, 216.0f, 66.0f),
-            new Cell(262.0f, 764.0f, 216.0f, 4.0f),
-            new Cell(266.0f, 764.0f, 216.0f, 84.0f),
-            new Cell(350.0f, 764.0f, 216.0f, 4.0f),
-            new Cell(354.0f, 764.0f, 216.0f, 32.0f),
-            new Cell(386.0f, 764.0f, 216.0f, 38.0f),
-            new Cell(424.0f, 764.0f, 216.0f, 18.0f),
-            new Cell(442.0f, 764.0f, 216.0f, 74.0f),
-            new Cell(516.0f, 764.0f, 216.0f, 28.0f),
-            new Cell(544.0f, 764.0f, 216.0f, 4.0f) };
-    
+
     public static final Rectangle[] EXPECTED_RECTANGLES = {
         new Rectangle(40.0f, 18.0f, 208.0f, 40.0f),
         new Rectangle(84.0f, 18.0f, 962.0f, 464.0f)
@@ -282,9 +157,23 @@ public class TestSpreadsheetExtractor {
     }
     
     @Test
-    public void testFindSpreadsheetsFromCells() {
+    public void testFindSpreadsheetsFromCells() throws IOException {
+
+        CSVParser parse = org.apache.commons.csv.CSVParser.parse(new File("src/test/resources/technology/tabula/csv/TestSpreadsheetExtractor-CELLS.csv"),
+                Charset.forName("utf-8"),
+                CSVFormat.DEFAULT);
+
+        List<Cell> cells = new ArrayList<Cell>();
+
+        for (CSVRecord record: parse) {
+            cells.add(new Cell(Float.parseFloat(record.get(0)),
+                    Float.parseFloat(record.get(1)),
+                    Float.parseFloat(record.get(2)),
+                    Float.parseFloat(record.get(3))));
+        }
+
+
         SpreadsheetExtractionAlgorithm se = new SpreadsheetExtractionAlgorithm();
-        List<? extends Rectangle> cells = Arrays.asList(CELLS);
         List<Rectangle> expected = Arrays.asList(EXPECTED_RECTANGLES);
         Collections.sort(expected);
         List<Rectangle> foundRectangles = se.findSpreadsheetsFromCells(cells);
@@ -318,6 +207,22 @@ public class TestSpreadsheetExtractor {
         assertEquals(expectedJson, sb.toString());
 
     }
+    
+    @Test
+    public void testSpanningCellsToCsv() throws IOException {
+        Page page = UtilsForTesting
+                .getPage("src/test/resources/technology/tabula/spanning_cells.pdf", 1);
+        String expectedCsv = UtilsForTesting.loadCsv("src/test/resources/technology/tabula/csv/spanning_cells.csv");
+        SpreadsheetExtractionAlgorithm se = new SpreadsheetExtractionAlgorithm();
+        List<? extends Table> tables = se.extract(page);
+        assertEquals(2, tables.size());
+                
+
+        StringBuilder sb = new StringBuilder();
+        (new CSVWriter()).write(sb, (List<Table>) tables);
+        assertEquals(expectedCsv, sb.toString());
+
+    }    
     
     @Test
     public void testIncompleteGrid() throws IOException {
@@ -472,9 +377,26 @@ public class TestSpreadsheetExtractor {
                 Arrays.asList(EXTERNALLY_DEFINED_RULINGS));
         assertEquals(1, tables.size());
         Table table = tables.get(0);
-        assertEquals("Payroll Period", table.getRows().get(0).get(0).getText());
-        assertEquals("154.17", table.getRows().get(3).get(1).getText());
         
+        assertEquals("Payroll Period", table.getRows().get(0).get(0).getText());
+        assertEquals("One Withholding\rAllowance", table.getRows().get(0).get(1).getText());
+        assertEquals("Weekly", table.getRows().get(1).get(0).getText());
+        assertEquals("$71.15", table.getRows().get(1).get(1).getText());
+        assertEquals("Biweekly", table.getRows().get(2).get(0).getText());
+        assertEquals("142.31", table.getRows().get(2).get(1).getText());
+        assertEquals("Semimonthly", table.getRows().get(3).get(0).getText());
+        assertEquals("154.17", table.getRows().get(3).get(1).getText());
+        assertEquals("Monthly", table.getRows().get(4).get(0).getText());
+        assertEquals("308.33", table.getRows().get(4).get(1).getText());
+        assertEquals("Quarterly", table.getRows().get(5).get(0).getText());
+        assertEquals("925.00", table.getRows().get(5).get(1).getText());
+        assertEquals("Semiannually", table.getRows().get(6).get(0).getText());
+        assertEquals("1,850.00", table.getRows().get(6).get(1).getText());
+        assertEquals("Annually", table.getRows().get(7).get(0).getText());
+        assertEquals("3,700.00", table.getRows().get(7).get(1).getText());
+        assertEquals("Daily or Miscellaneous\r(each day of the payroll period)", table.getRows().get(8).get(0).getText());
+        assertEquals("14.23", table.getRows().get(8).get(1).getText());
+         
     }
     
     @Test
@@ -578,5 +500,17 @@ public class TestSpreadsheetExtractor {
         // assertEquals("مرحباً",                       table.getRows().get(0).get(0).getText()); // really ought to be ً, but this is forgiveable for now
 
     }
+    
+    @Test
+    public void testExtractColumnsCorrectly3() throws IOException {
+
+    	Page page = UtilsForTesting.getAreaFromFirstPage("src/test/resources/technology/tabula/frx_2012_disclosure.pdf", 
+                106.01f, 48.09f, 227.31f, 551.89f);
+    	SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
+        Table table = sea.extract(page).get(0);
+
+        assertEquals("REGIONAL PULMONARY & SLEEP\rMEDICINE",  table.getRows().get(8).get(1).getText());
+        
+    }    
 
 }
