@@ -108,7 +108,6 @@ public class NurminenDetectionAlgorithm implements DetectionAlgorithm {
         try {
             image = Utils.pageConvertToImage(pdfPage, 144, ImageType.GRAY);
         } catch (IOException e) {
-        	e.printStackTrace();
             return new ArrayList<Rectangle>();
         }
 
@@ -120,7 +119,6 @@ public class NurminenDetectionAlgorithm implements DetectionAlgorithm {
             removeTextDocument = this.removeText(pdfPage);
             image = Utils.pageConvertToImage(pdfPage, 144, ImageType.GRAY);
         } catch (Exception e) {
-        	e.printStackTrace();
             return new ArrayList<Rectangle>();
         } finally {
 			if (removeTextDocument != null) {
@@ -302,6 +300,10 @@ public class NurminenDetectionAlgorithm implements DetectionAlgorithm {
                 if (o2.contains(o1)) {
                     return 0;
                 }
+                
+                if (o1.contains(o2)) {
+                    return 0;
+                }
 
                 // otherwise see if these tables are "mostly" the same
                 float overlap = o1.overlapRatio(o2);
@@ -430,7 +432,7 @@ public class NurminenDetectionAlgorithm implements DetectionAlgorithm {
 
         // do the same for lines at the top, but make the threshold greater since table headings tend to be
         // larger to fit up to three-ish rows of text (at least but we don't want to grab too much)
-        rowHeightThreshold = avgRowHeight * 3.5f;
+        rowHeightThreshold = avgRowHeight * 3.8f;
 
         for (int i=horizontalRulings.size() - 1; i>=0; i--) {
             Line2D.Float ruling = horizontalRulings.get(i);
