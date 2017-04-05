@@ -387,4 +387,21 @@ public class TestBasicExtractor {
         assertEquals(expectedCsv, sb.toString());
     }
     
+    //ISSUE: https://github.com/tabulapdf/tabula-java/issues/140
+    @Test
+    public void testExtractTableCorrectly() throws IOException {
+    	String expectedCsv = UtilsForTesting.loadCsv("src/test/resources/technology/tabula/csv/a.csv");
+        Page page = UtilsForTesting.getPage("src/test/resources/technology/tabula/a.pdf", 2);
+        BasicExtractionAlgorithm bea = new BasicExtractionAlgorithm();
+        List<Table> tables = bea.extract(page);
+        assertEquals(1, tables.size());
+        
+        StringBuilder sb = new StringBuilder();
+        (new CSVWriter()).write(sb, tables.get(0));
+        assertEquals(expectedCsv, sb.toString());
+        
+        List<RectangularTextContainer> cells = tables.get(0).getCells();
+        assertEquals("ABC One or other Fund", cells.get(0).getText());
+    }    
+    
 }

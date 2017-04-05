@@ -511,6 +511,16 @@ public class TestSpreadsheetExtractor {
 
         assertEquals("REGIONAL PULMONARY & SLEEP\rMEDICINE",  table.getRows().get(8).get(1).getText());
         
+    }
+    
+    @Test
+    public void testIsTabular() throws IOException {
+        Page page = UtilsForTesting.getPage("src/test/resources/technology/tabula/a.pdf",
+                2);
+
+        SpreadsheetExtractionAlgorithm sea = new SpreadsheetExtractionAlgorithm();
+        
+        assertFalse(sea.isTabular(page));
     }    
 
 }
